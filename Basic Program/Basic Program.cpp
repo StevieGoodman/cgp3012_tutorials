@@ -20,6 +20,9 @@ PxScene* scene;
 PxRigidDynamic* box;
 PxRigidStatic* plane;
 
+int time_elapsed{};
+bool moved{ false };
+
 ///Initialise PhysX objects
 bool PxInit()
 {
@@ -105,12 +108,13 @@ void InitScene()
 	scene->addActor(*plane);
 
 	//create a dynamic actor and place it 10 m above the ground
-	box = physics->createRigidDynamic(PxTransform(PxVec3(0.f, 10.f, 0.f)));
+	box = physics->createRigidDynamic(PxTransform(PxVec3(0.f, .5f, 0.f)));
 	//create a box shape of 1m x 1m x 1m size (values are provided in halves)
 	box->createShape(PxBoxGeometry(.5f, .5f, .5f), *default_material);
 	//update the mass of the box
 	PxRigidBodyExt::updateMassAndInertia(*box, 1.f); //density of 1kg/m^3
 	scene->addActor(*box);
+	box->addForce(PxVec3{ 100, 0, 0 });
 }
 
 /// Perform a single simulation step
@@ -118,11 +122,10 @@ void Update(PxReal delta_time, int steps)
 {
 	scene->simulate(delta_time);
 	scene->fetchResults(true);
-	if (steps == 10) {
-		PxVec3 position = box->getGlobalPose().p;
-		PxVec3 offset{ 10, 0, 0 };
-		PxTransform newPose{ position + offset };
-		box->setGlobalPose(newPose);
+	time_elapsed += delta_time;
+	if (time_elapsed > 10 && !moved) {
+		moved = true;
+		box->setLinearVelocity(PxVec3{ 0, 0, 0});
 	}
 }
 
