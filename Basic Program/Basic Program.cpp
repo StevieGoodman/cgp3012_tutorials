@@ -114,10 +114,16 @@ void InitScene()
 }
 
 /// Perform a single simulation step
-void Update(PxReal delta_time)
+void Update(PxReal delta_time, int steps)
 {
 	scene->simulate(delta_time);
 	scene->fetchResults(true);
+	if (steps == 10) {
+		PxVec3 position = box->getGlobalPose().p;
+		PxVec3 offset{ 10, 0, 0 };
+		PxTransform newPose{ position + offset };
+		box->setGlobalPose(newPose);
+	}
 }
 
 /// The main function
@@ -153,7 +159,7 @@ int main()
 		cout << "Seconds passed: " << steps * delta_time << endl;
 
 		//perform a single simulation step
-		Update(delta_time);
+		Update(delta_time, steps);
 		
 		//introduce 100ms delay for easier visual analysis of the results
 		Sleep(100);
