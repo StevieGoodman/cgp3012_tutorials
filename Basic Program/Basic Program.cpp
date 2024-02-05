@@ -136,9 +136,12 @@ int main()
 	//set the simulation step to 1/60th of a second
 	PxReal delta_time = 1.f/60.f;
 
+	int steps{};
+
 	//simulate until the 'Esc' is pressed
 	while (!GetAsyncKeyState(VK_ESCAPE))
 	{
+		steps++;
 		//'visualise' position and velocity of the box
 		PxVec3 position = box->getGlobalPose().p;
 		PxVec3 velocity = box->getLinearVelocity();
@@ -146,6 +149,8 @@ int main()
 			", y=" << position.y << ", z=" << position.z << ",  ";
 		cout << setiosflags(ios::fixed) << setprecision(2) << "vx=" << velocity.x << 
 			", vy=" << velocity.y << ", vz=" << velocity.z << endl;
+
+		cout << "Seconds passed: " << steps * delta_time << endl;
 
 		//perform a single simulation step
 		Update(delta_time);
