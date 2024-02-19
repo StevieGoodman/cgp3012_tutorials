@@ -101,7 +101,7 @@ void InitScene()
 	scene->setGravity(PxVec3(0.f, -9.81f, 0.f));
 
 	//materials
-	PxMaterial* default_material = physics->createMaterial(0.f, 0.f, 0.f);   //static friction, dynamic friction, restitution
+ 	PxMaterial* default_material = physics->createMaterial(0.f, 0.2f, 0.f);   //static friction, dynamic friction, restitution
 
 	//create a static plane (XZ)
 	plane = PxCreatePlane(*physics, PxPlane(PxVec3(0.f, 1.f, 0.f), 0.f), *default_material);
@@ -114,7 +114,7 @@ void InitScene()
 	//update the mass of the box
 	PxRigidBodyExt::updateMassAndInertia(*box, 1.f); //density of 1kg/m^3
 	scene->addActor(*box);
-	box->addForce(PxVec3{ 100, 0, 0 });
+	box->addForce(PxVec3{ 170, 0, 0 });
 }
 
 /// Perform a single simulation step
@@ -158,12 +158,10 @@ int main()
 			", y=" << position.y << ", z=" << position.z << ",  ";
 		cout << setiosflags(ios::fixed) << setprecision(2) << "vx=" << velocity.x << 
 			", vy=" << velocity.y << ", vz=" << velocity.z << endl;
-
-		cout << "Seconds passed: " << steps * delta_time << endl;
-
+		cout << "isSleeping: " << box->isSleeping() << endl;
 		//perform a single simulation step
 		Update(delta_time, steps);
-		
+
 		//introduce 100ms delay for easier visual analysis of the results
 		Sleep(100);
 	}
