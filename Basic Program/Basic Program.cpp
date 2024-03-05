@@ -17,7 +17,8 @@ PxPvd*  pvd = 0;
 
 //simulation objects
 PxScene* scene;
-PxRigidDynamic* box;
+PxRigidDynamic* droppedBox;
+PxRigidStatic* restingBox;
 PxRigidStatic* plane;
 
 int time_elapsed{};
@@ -107,14 +108,16 @@ void InitScene()
 	plane = PxCreatePlane(*physics, PxPlane(PxVec3(0.f, 1.f, 0.f), 0.f), *default_material);
 	scene->addActor(*plane);
 
-	//create a dynamic actor and place it 10 m above the ground
-	box = physics->createRigidDynamic(PxTransform(PxVec3(0.f, .5f, 0.f)));
-	//create a box shape of 1m x 1m x 1m size (values are provided in halves)
-	box->createShape(PxBoxGeometry(.5f, .5f, .5f), *default_material);
-	//update the mass of the box
-	PxRigidBodyExt::updateMassAndInertia(*box, 1.f); //density of 1kg/m^3
-	scene->addActor(*box);
-	box->addForce(PxVec3{ 170, 0, 0 });
+	// Create the dropped box
+	droppedBox = physics->createRigidDynamic(PxTransform(PxVec3(0.f, 100.0f, 0.f)));
+	droppedBox->createShape(PxBoxGeometry(.5f, .5f, .5f), *default_material);
+	PxRigidBodyExt::updateMassAndInertia(*droppedBox, 1.f); //density of 1kg/m^3
+	scene->addActor(*droppedBox);
+
+	// Create the resting box
+	restingBox = physics->createRigidStatic(PxTransform(PxVec3(0.f, .5f, 0.f)));
+	restingBox->createShape(PxBoxGeometry(.5f, .5f, .5f), *default_material);
+	scene->addActor(*restingBox);
 }
 
 /// Perform a single simulation step
@@ -125,7 +128,7 @@ void Update(PxReal delta_time, int steps)
 	time_elapsed += delta_time;
 	if (time_elapsed > 10 && !moved) {
 		moved = true;
-		box->setLinearVelocity(PxVec3{ 0, 0, 0});
+		droppedBox->setLinearVelocity(PxVec3{ 0, 0, 0});
 	}
 }
 
@@ -147,23 +150,25 @@ int main()
 
 	int steps{};
 
+	Sleep(2000);
+
 	//simulate until the 'Esc' is pressed
 	while (!GetAsyncKeyState(VK_ESCAPE))
 	{
 		steps++;
 		//'visualise' position and velocity of the box
-		PxVec3 position = box->getGlobalPose().p;
-		PxVec3 velocity = box->getLinearVelocity();
+		PxVec3 position = droppedBox->getGlobalPose().p;
+		PxVec3 velocity = droppedBox->getLinearVelocity();
 		cout << setiosflags(ios::fixed) << setprecision(2) << "x=" << position.x << 
 			", y=" << position.y << ", z=" << position.z << ",  ";
 		cout << setiosflags(ios::fixed) << setprecision(2) << "vx=" << velocity.x << 
 			", vy=" << velocity.y << ", vz=" << velocity.z << endl;
-		cout << "isSleeping: " << box->isSleeping() << endl;
+		cout << "isSleeping: " << droppedBox->isSleeping() << endl;
 		//perform a single simulation step
 		Update(delta_time, steps);
 
 		//introduce 100ms delay for easier visual analysis of the results
-		Sleep(100);
+		Sleep(50);
 	}
 
 	//Release all resources
