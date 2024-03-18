@@ -6,6 +6,22 @@
 
 namespace PhysicsEngine
 {
+
+	// CompoundObject
+	class CompoundObject : public DynamicActor {
+	public:
+		CompoundObject(
+			const PxTransform& pose = PxTransform(PxIdentity), 
+			PxVec3 extents = { 0.5, 0.5, 0.5 },
+			PxReal density = 1.f) 
+		: DynamicActor(pose) {
+			CreateShape(PxBoxGeometry(extents), density);
+			CreateShape(PxBoxGeometry(extents), density);
+			GetShape(0)->setLocalPose(PxTransform{ -extents.x, 0, 0 });
+			GetShape(1)->setLocalPose(PxTransform{ extents.x, 0, 0 });
+		}
+	};
+
 	///Plane class
 	class Plane : public StaticActor
 	{
@@ -43,7 +59,7 @@ namespace PhysicsEngine
 		// - denisty: 1kg/m^3
 		Box(const PxTransform& pose=PxTransform(PxIdentity), PxVec3 dimensions=PxVec3(.5f,.5f,.5f), PxReal density=1.f) 
 			: DynamicActor(pose)
-		{ 
+		{
 			CreateShape(PxBoxGeometry(dimensions), density);
 		}
 	};
